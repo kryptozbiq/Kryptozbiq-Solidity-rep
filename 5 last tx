@@ -1,0 +1,35 @@
+require('dotenv').config();
+const axios = require('axios');
+
+async function getLastTransactions(address) {
+    const apiKey = process.env.ETHERSCAN_API_KEY;
+    const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${apiKey}`;
+
+    try {
+        const response = await axios.get(url);
+        const transactions = response.data.result;
+
+        if (transactions.length === 0) {
+            console.log("Brak transakcji dla tego adresu.");
+            return;
+        }
+
+        console.log(`Ostatnie 5 transakcji dla adresu ${address}:`);
+        transactions.slice(0, 5).forEach((tx, index) => {
+            console.log(`\nTransakcja ${index + 1}:`);
+            console.log(`Hash: ${tx.hash}`);
+            console.log(`Link: https://etherscan.io/tx/${tx.hash}`);
+            console.log(`Od: ${tx.from}`);
+            console.log(`Do: ${tx.to}`);
+            console.log(`Wartość: ${tx.value / 1e18} ETH`);
+            console.log(`Blok: ${tx.blockNumber}`);
+            console.log(`Status: ${tx.isError === "0" ? "Sukces" : "Błąd"}`);
+        });
+    } catch (error) {
+        console.error("Błąd podczas pobierania danych:", error);
+    }
+}
+
+// Wprowadź adres Ethereum, który chcesz sprawdzić
+const address = "wprowadź_adres_ethereum";
+getLastTransactions(address);
